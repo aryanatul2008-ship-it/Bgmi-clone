@@ -1,75 +1,165 @@
-using UnityEngine;
 using System.Collections;
+using Unity.Cinemachine;
+using UnityEngine;
 
+/// Raycast gun for the custom PlayerMovement + Cinemachine (Orbital Follow) setup.
+/// Attach to the Player ONLY (not Enemy / Canvas).
 public class Gun : MonoBehaviour
 {
-    // Gun Stats
+    [Header("Gun Stats")]
     public float damage = 10f;
     public float range = 100f;
-    public float fireRate = 10f; // Bullets fired per second
+    public float fireRate = 10f;       // bullets per second
+    public bool automatic = true;
 
-    // Ammo System
-    public int maxAmmo = 30;
-    private int currentAmmo;
-    public float reloadTime = 2f; // Takes 2 seconds to reload
-    private bool isReloading = false;
+    [Header("Ammo")]
+    public int maxAmmo = 30;           // magazine size
+    public int reserveAmmo = 90;
+    public float reloadTime = 2f;
 
-    public Camera mainCamera;
-    private float nextTimeToFire = 0f;
+    [Header("References")]
+    public Camera mainCamera;                       // auto-filled if empty
+    public CinemachineOrbitalFollow orbitalCamera;  // auto-found, used for recoil
+    public ParticleSystem muzzleFlash;
+    public AudioSource audioSource;
+    public AudioClip shotClip, reloadClip;
+    public LayerMask hitMask = Physics.DefaultRaycastLayers; // everything except Ignore Raycast
+
+    [Header("Spread (0.01 is about a 0.6 degree cone)")]
+    public float baseSpread = 0.005f;
+    public float spreadPerShot = 0.004f;
+    public float maxSpread = 0.05f;
+    public float spreadRecovery = 0.1f;   // per second
+
+    [Header("Recoil (degrees per shot)")]
+    public float recoilPitch = 1.0f;      // vertical kick
+    public float recoilYaw = 0.4f;        // random +/- sideways kick
+    public float recoilSmoothing = 20f;   // higher = snappier kick
+
+    public int CurrentAmmo => currentAmmo; // for the HUD later
+    public int ReserveAmmo => reserveAmmo;
+    public bool IsReloading => isReloading;
+
+    int currentAmmo;
+    bool isReloading;
+    float nextTimeToFire;
+    float currentSpread;
+    float pendingPitch, pendingYaw;
+
+    void Awake()
+    {
+        // These two lines remove the UnassignedReferenceException for good
+        if (mainCamera == null) mainCamera = Camera.main;
+        if (orbitalCamera == null) orbitalCamera = FindAnyObjectByType<CinemachineOrbitalFollow>();
+    }
 
     void Start()
     {
-        // Fill the magazine when the game starts
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
         currentAmmo = maxAmmo;
+        currentSpread = baseSpread;
     }
+
+    void OnDisable() { isReloading = false; } // weapon switched mid-reload
 
     void Update()
     {
-        if (isReloading)
-            return;
+        HandleCursor();
+        ApplyRecoil();
+        currentSpread = Mathf.MoveTowards(currentSpread, baseSpread, spreadRecovery * Time.deltaTime);
 
-        // Press 'R' to reload, or auto-reload if the magazine is empty
-        if (currentAmmo <= 0 || Input.GetKeyDown(KeyCode.R))
-        {
-            StartCoroutine(Reload());
-            return;
-        }
+        if (Cursor.lockState != CursorLockMode.Locked || isReloading) return;
 
-        // GetButton (instead of GetButtonDown) allows automatic fire by holding the mouse
-        if (Input.GetButton("Fire1") && Time.time >= nextTimeToFire)
+        if (Input.GetKeyDown(KeyCode.R)) { StartReload(); return; }
+
+        bool wantsFire = automatic ? Input.GetButton("Fire1") : Input.GetButtonDown("Fire1");
+        if (wantsFire && Time.time >= nextTimeToFire)
         {
+            if (currentAmmo <= 0) { StartReload(); return; }
             nextTimeToFire = Time.time + 1f / fireRate;
             Shoot();
         }
     }
 
-    // A Coroutine allows us to pause code execution (simulate reload time)
-    IEnumerator Reload()
+    void HandleCursor()
     {
-        isReloading = true;
-        Debug.Log("Reloading...");
-
-        // Wait for exactly 'reloadTime' seconds before moving to the next line
-        yield return new WaitForSeconds(reloadTime);
-
-        currentAmmo = maxAmmo;
-        isReloading = false;
-        Debug.Log("Reload Complete! Ammo is back to " + currentAmmo);
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+        else if (Cursor.lockState != CursorLockMode.Locked && Input.GetMouseButtonDown(0))
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+            nextTimeToFire = Time.time + 0.2f; // the click that re-locks the cursor shouldn't also fire
+        }
     }
 
     void Shoot()
     {
-        currentAmmo--; // Subtract 1 bullet
-        Debug.Log("BANG! Ammo left: " + currentAmmo);
+        currentAmmo--;
 
-        RaycastHit hit;
-        if (Physics.Raycast(mainCamera.transform.position, mainCamera.transform.forward, out hit, range))
+        // Random offset on the camera's right/up axes gives a cone of fire
+        Transform cam = mainCamera.transform;
+        Vector3 dir = cam.forward
+                    + cam.right * Random.Range(-currentSpread, currentSpread)
+                    + cam.up * Random.Range(-currentSpread, currentSpread);
+        dir.Normalize();
+
+        if (Physics.Raycast(cam.position, dir, out RaycastHit hit, range, hitMask, QueryTriggerInteraction.Ignore))
         {
-            Target target = hit.transform.GetComponent<Target>();
-            if (target != null)
-            {
-                target.TakeDamage(damage);
-            }
-        }
+            Health h = hit.collider.GetComponentInParent<Health>();
+            if (h != null) h.TakeDamage(damage);
+            Debug.DrawLine(cam.position, hit.point, Color.red, 0.5f);
+        } 
+        if (muzzleFlash) muzzleFlash.Play();
+        if (audioSource && shotClip) audioSource.PlayOneShot(shotClip);
+
+        // Spread grows while firing, recoil gets queued and applied smoothly
+        currentSpread = Mathf.Min(maxSpread, currentSpread + spreadPerShot);
+        pendingPitch += recoilPitch;
+        pendingYaw += Random.Range(-recoilYaw, recoilYaw);
     }
+
+    void ApplyRecoil()
+    {
+        if (orbitalCamera == null) return;
+        if (Mathf.Approximately(pendingPitch, 0f) && Mathf.Approximately(pendingYaw, 0f)) return;
+
+        float k = 1f - Mathf.Exp(-recoilSmoothing * Time.deltaTime);
+        float p = pendingPitch * k;
+        float y = pendingYaw * k;
+        pendingPitch -= p;
+        pendingYaw -= y;
+
+        // Lower vertical value = camera looks higher
+        var v = orbitalCamera.VerticalAxis;
+        v.Value = Mathf.Clamp(v.Value - p, v.Range.x, v.Range.y);
+        orbitalCamera.VerticalAxis = v;
+
+        var h = orbitalCamera.HorizontalAxis;
+        h.Value += y;
+        orbitalCamera.HorizontalAxis = h;
+    }
+
+    void StartReload()
+    {
+        if (isReloading || currentAmmo >= maxAmmo || reserveAmmo <= 0) return;
+        StartCoroutine(Reload());
+    }
+
+    IEnumerator Reload()
+    {
+        isReloading = true;
+        if (audioSource && reloadClip) audioSource.PlayOneShot(reloadClip);
+        yield return new WaitForSeconds(reloadTime);
+        int needed = Mathf.Min(maxAmmo - currentAmmo, reserveAmmo);
+        currentAmmo += needed;
+        reserveAmmo -= needed;
+        isReloading = false;
+    }
+
+    public void AddAmmo(int amount) { reserveAmmo += amount; }
 }
