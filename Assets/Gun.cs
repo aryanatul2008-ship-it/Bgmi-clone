@@ -3,7 +3,7 @@ using Unity.Cinemachine;
 using UnityEngine;
 
 /// Raycast gun for the custom PlayerMovement + Cinemachine (Orbital Follow) setup.
-/// Attach to the Player ONLY (not Enemy / Canvas).
+/// Each weapon is its own child object of the Player (Rifle, SMG, Sniper...).
 public class Gun : MonoBehaviour
 {
     [Header("Gun Stats")]
@@ -36,11 +36,13 @@ public class Gun : MonoBehaviour
     public float recoilYaw = 0.4f;        // random +/- sideways kick
     public float recoilSmoothing = 20f;   // higher = snappier kick
 
-    public int CurrentAmmo => currentAmmo; // for the HUD later
+    // A weapon that has never been equipped hasn't run Start() yet, so report a full magazine for the HUD.
+    public int CurrentAmmo => started ? currentAmmo : maxAmmo;
     public int ReserveAmmo => reserveAmmo;
     public bool IsReloading => isReloading;
 
     int currentAmmo;
+    bool started;
     bool isReloading;
     float nextTimeToFire;
     float currentSpread;
@@ -48,7 +50,6 @@ public class Gun : MonoBehaviour
 
     void Awake()
     {
-        // These two lines remove the UnassignedReferenceException for good
         if (mainCamera == null) mainCamera = Camera.main;
         if (orbitalCamera == null) orbitalCamera = FindAnyObjectByType<CinemachineOrbitalFollow>();
     }
@@ -59,6 +60,7 @@ public class Gun : MonoBehaviour
         Cursor.visible = false;
         currentAmmo = maxAmmo;
         currentSpread = baseSpread;
+        started = true;
     }
 
     void OnDisable() { isReloading = false; } // weapon switched mid-reload
@@ -111,9 +113,10 @@ public class Gun : MonoBehaviour
         if (Physics.Raycast(cam.position, dir, out RaycastHit hit, range, hitMask, QueryTriggerInteraction.Ignore))
         {
             Health h = hit.collider.GetComponentInParent<Health>();
-            if (h != null) h.TakeDamage(damage);
+            if (h != null) h.TakeDamage(damage, true); // true = fired by the player, so kills get counted
             Debug.DrawLine(cam.position, hit.point, Color.red, 0.5f);
-        } 
+        }
+
         if (muzzleFlash) muzzleFlash.Play();
         if (audioSource && shotClip) audioSource.PlayOneShot(shotClip);
 
