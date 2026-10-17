@@ -20,7 +20,8 @@ public class Gun : MonoBehaviour
     [Header("References")]
     public Camera mainCamera;                       // auto-filled if empty
     public CinemachineOrbitalFollow orbitalCamera;  // auto-found, used for recoil
-    public ParticleSystem muzzleFlash;
+    public GunEffects effects;                      // auto-found on the same object (tracer, flash, hit puffs)
+    public ParticleSystem muzzleFlash;              // optional extra, if you make your own particle effect
     public AudioSource audioSource;
     public AudioClip shotClip, reloadClip;
     public LayerMask hitMask = Physics.DefaultRaycastLayers; // everything except Ignore Raycast
@@ -52,6 +53,7 @@ public class Gun : MonoBehaviour
     {
         if (mainCamera == null) mainCamera = Camera.main;
         if (orbitalCamera == null) orbitalCamera = FindAnyObjectByType<CinemachineOrbitalFollow>();
+        if (effects == null) effects = GetComponent<GunEffects>();
     }
 
     void Start()
@@ -110,13 +112,27 @@ public class Gun : MonoBehaviour
                     + cam.up * Random.Range(-currentSpread, currentSpread);
         dir.Normalize();
 
+        Vector3 endPoint = cam.position + dir * range;
+        Vector3 normal = -dir;
+        bool hitSomething = false;
+        bool hitCharacter = false;
+
         if (Physics.Raycast(cam.position, dir, out RaycastHit hit, range, hitMask, QueryTriggerInteraction.Ignore))
         {
+            hitSomething = true;
+            endPoint = hit.point;
+            normal = hit.normal;
+
             Health h = hit.collider.GetComponentInParent<Health>();
-            if (h != null) h.TakeDamage(damage, true); // true = fired by the player, so kills get counted
+            if (h != null)
+            {
+                h.TakeDamage(damage, true); // true = fired by the player, so kills get counted
+                hitCharacter = true;
+            }
             Debug.DrawLine(cam.position, hit.point, Color.red, 0.5f);
         }
 
+        if (effects != null) effects.Fire(endPoint, normal, hitSomething, hitCharacter);
         if (muzzleFlash) muzzleFlash.Play();
         if (audioSource && shotClip) audioSource.PlayOneShot(shotClip);
 
