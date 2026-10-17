@@ -22,8 +22,9 @@ public class Gun : MonoBehaviour
     public CinemachineOrbitalFollow orbitalCamera;  // auto-found, used for recoil
     public GunEffects effects;                      // auto-found on the same object (tracer, flash, hit puffs)
     public ParticleSystem muzzleFlash;              // optional extra, if you make your own particle effect
-    public AudioSource audioSource;
+    public AudioSource audioSource;                 // auto-created if empty
     public AudioClip shotClip, reloadClip;
+    [Range(0f, 1f)] public float shotVolume = 0.8f;
     public LayerMask hitMask = Physics.DefaultRaycastLayers; // everything except Ignore Raycast
 
     [Header("Spread (0.01 is about a 0.6 degree cone)")]
@@ -54,6 +55,12 @@ public class Gun : MonoBehaviour
         if (mainCamera == null) mainCamera = Camera.main;
         if (orbitalCamera == null) orbitalCamera = FindAnyObjectByType<CinemachineOrbitalFollow>();
         if (effects == null) effects = GetComponent<GunEffects>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
+            audioSource.spatialBlend = 0f; // 2D sound: always heard at full strength by the player
+        }
     }
 
     void Start()
@@ -134,7 +141,11 @@ public class Gun : MonoBehaviour
 
         if (effects != null) effects.Fire(endPoint, normal, hitSomething, hitCharacter);
         if (muzzleFlash) muzzleFlash.Play();
-        if (audioSource && shotClip) audioSource.PlayOneShot(shotClip);
+        if (audioSource && shotClip)
+        {
+            audioSource.pitch = Random.Range(0.95f, 1.05f); // tiny variation so automatic fire doesn't sound robotic
+            audioSource.PlayOneShot(shotClip, shotVolume);
+        }
 
         // Spread grows while firing, recoil gets queued and applied smoothly
         currentSpread = Mathf.Min(maxSpread, currentSpread + spreadPerShot);
@@ -172,7 +183,11 @@ public class Gun : MonoBehaviour
     IEnumerator Reload()
     {
         isReloading = true;
-        if (audioSource && reloadClip) audioSource.PlayOneShot(reloadClip);
+        if (audioSource && reloadClip)
+        {
+            audioSource.pitch = 1f;
+            audioSource.PlayOneShot(reloadClip);
+        }
         yield return new WaitForSeconds(reloadTime);
         int needed = Mathf.Min(maxAmmo - currentAmmo, reserveAmmo);
         currentAmmo += needed;

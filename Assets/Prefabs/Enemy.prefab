@@ -93,12 +93,15 @@ MonoBehaviour:
   aimOffset: {x: 0, y: 0.3, z: 0}
   attackRange: 25
   patrolRadius: 30
+  thinkInterval: 0.15
   fireRate: 1.5
   damage: 4
   inaccuracy: 0.1
   sightMask:
     serializedVersion: 2
     m_Bits: 4294967295
+  shotClip: {fileID: 8300000, guid: 416116545b0645f4ba9db75930df7ea3, type: 3}
+  shotVolume: 0.6
 --- !u!1 &5330080814916025907
 GameObject:
   m_ObjectHideFlags: 0

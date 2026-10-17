@@ -18,6 +18,7 @@ public class GunEffects : MonoBehaviour
     public Color flashColor = new Color(1f, 0.75f, 0.2f, 1f);
     public float flashSize = 0.25f;
     public float flashTime = 0.05f;
+    public bool useFlashLight = false;       // a real light flickering 15x per second can cost FPS on fast guns; the blob alone looks fine
     public float flashLightIntensity = 3f;
 
     [Header("Hit puffs")]
@@ -71,13 +72,16 @@ public class GunEffects : MonoBehaviour
         for (int i = 0; i < PuffCount; i++) puffs[i] = MakePuff("HitPuff");
         flash = MakePuff("MuzzleFlash");
 
-        GameObject lg = new GameObject("MuzzleLight");
-        lg.transform.SetParent(holder, false);
-        flashLight = lg.AddComponent<Light>();
-        flashLight.type = LightType.Point;
-        flashLight.range = 8f;
-        flashLight.shadows = LightShadows.None;
-        flashLight.enabled = false;
+        if (useFlashLight)
+        {
+            GameObject lg = new GameObject("MuzzleLight");
+            lg.transform.SetParent(holder, false);
+            flashLight = lg.AddComponent<Light>();
+            flashLight.type = LightType.Point;
+            flashLight.range = 8f;
+            flashLight.shadows = LightShadows.None;
+            flashLight.enabled = false;
+        }
     }
 
     // ------------------------------------------------------------ called by Gun.cs
@@ -101,11 +105,14 @@ public class GunEffects : MonoBehaviour
 
         // Muzzle flash (blob + short light)
         Show(flash, start, flashColor, flashSize, flashTime);
-        flashLight.transform.position = start;
-        flashLight.color = flashColor;
-        flashLight.intensity = flashLightIntensity;
-        flashLight.enabled = true;
-        flashEnd = Time.time + flashTime;
+        if (flashLight != null)
+        {
+            flashLight.transform.position = start;
+            flashLight.color = flashColor;
+            flashLight.intensity = flashLightIntensity;
+            flashLight.enabled = true;
+            flashEnd = Time.time + flashTime;
+        }
 
         // Hit puff
         if (hitSomething)
@@ -134,7 +141,7 @@ public class GunEffects : MonoBehaviour
         for (int i = 0; i < TracerCount; i++)
             if (tracers[i].enabled && now >= tracerEnd[i]) tracers[i].enabled = false;
 
-        if (flashLight.enabled && now >= flashEnd) flashLight.enabled = false;
+        if (flashLight != null && flashLight.enabled && now >= flashEnd) flashLight.enabled = false;
 
         Animate(flash, now);
         for (int i = 0; i < PuffCount; i++) Animate(puffs[i], now);
