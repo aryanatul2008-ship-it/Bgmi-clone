@@ -14,6 +14,7 @@ public class Health : MonoBehaviour
 
     public float maxHealth = 100f;
     public bool isPlayer;
+    public float destroyDelay = 0.1f;   // seconds a dead non-player stays in the scene (set ~4 on bots so the death animation can play)
     public UnityEvent onDeath;
 
     public float Current { get; private set; }
@@ -31,7 +32,7 @@ public class Health : MonoBehaviour
         {
             if (fromPlayer && !isPlayer) PlayerKills++;
             onDeath?.Invoke();
-            if (!isPlayer) Destroy(gameObject, 0.1f);
+            if (!isPlayer) Destroy(gameObject, destroyDelay);
         }
     }
 
