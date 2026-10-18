@@ -403,6 +403,7 @@ GameObject:
   - component: {fileID: 27423721}
   - component: {fileID: 27423722}
   - component: {fileID: 27423723}
+  - component: {fileID: 27423724}
   m_Layer: 2
   m_Name: Player
   m_TagString: Player
@@ -474,6 +475,12 @@ MonoBehaviour:
   gravity: -9.81
   jumpHeight: 1.2
   turnSpeed: 15
+  crouchSpeedMultiplier: 0.5
+  standHeight: 2
+  crouchHeight: 1.2
+  crouchSmoothing: 12
+  safeFallHeight: 3
+  damagePerMeter: 10
 --- !u!114 &27423719
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -500,6 +507,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Health
   maxHealth: 100
   isPlayer: 1
+  destroyDelay: 0.1
   onDeath:
     m_PersistentCalls:
       m_Calls: []
@@ -556,6 +564,22 @@ MonoBehaviour:
   animator: {fileID: 0}
   damping: 0.1
   airGrace: 0.12
+--- !u!114 &27423724
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 27423713}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35f307b8ce4e9d949a41c8e5fc69a520, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScopeController
+  switcher: {fileID: 0}
+  playerHealth: {fileID: 0}
+  vcam: {fileID: 0}
+  crosshair: {fileID: 0}
 --- !u!4 &29311227 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2143742791705135478, guid: 3163e5ae0c5163347be81942295b1940, type: 3}
@@ -2297,6 +2321,7 @@ GameObject:
   - component: {fileID: 618132626}
   - component: {fileID: 618132627}
   - component: {fileID: 618132628}
+  - component: {fileID: 618132629}
   m_Layer: 0
   m_Name: Rifle
   m_TagString: Untagged
@@ -2383,6 +2408,23 @@ MonoBehaviour:
   enemyHitSize: 0.45
   surfaceHitSize: 0.3
   hitTime: 0.2
+--- !u!114 &618132629
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 618132625}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4e4f931e460cc64eb564670f8efa30b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GunScope
+  type: 1
+  zoomFOV: 45
+  spreadMultiplier: 0.5
+  sensitivityMultiplier: 0.7
+  zoomSpeed: 8
 --- !u!4 &657158055 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 850179497b8068f4e8bc4748d64e5237, type: 3}
@@ -4482,6 +4524,7 @@ GameObject:
   - component: {fileID: 1412872501}
   - component: {fileID: 1412872502}
   - component: {fileID: 1412872503}
+  - component: {fileID: 1412872504}
   m_Layer: 0
   m_Name: Sniper
   m_TagString: Untagged
@@ -4568,6 +4611,23 @@ MonoBehaviour:
   enemyHitSize: 0.45
   surfaceHitSize: 0.3
   hitTime: 0.2
+--- !u!114 &1412872504
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1412872500}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4e4f931e460cc64eb564670f8efa30b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GunScope
+  type: 1
+  zoomFOV: 18
+  spreadMultiplier: 0.1
+  sensitivityMultiplier: 0.25
+  zoomSpeed: 8
 --- !u!1001 &1425147003
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5148,6 +5208,7 @@ GameObject:
   - component: {fileID: 1593317775}
   - component: {fileID: 1593317774}
   - component: {fileID: 1593317776}
+  - component: {fileID: 1593317777}
   m_Layer: 0
   m_Name: SMG
   m_TagString: Untagged
@@ -5234,6 +5295,23 @@ MonoBehaviour:
   enemyHitSize: 0.45
   surfaceHitSize: 0.3
   hitTime: 0.2
+--- !u!114 &1593317777
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1593317773}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4e4f931e460cc64eb564670f8efa30b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GunScope
+  type: 1
+  zoomFOV: 50
+  spreadMultiplier: 0.6
+  sensitivityMultiplier: 0.8
+  zoomSpeed: 8
 --- !u!4 &1612795902 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2143742791705135478, guid: 3163e5ae0c5163347be81942295b1940, type: 3}
@@ -5657,6 +5735,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Health
   maxHealth: 50
   isPlayer: 0
+  destroyDelay: 0.1
   onDeath:
     m_PersistentCalls:
       m_Calls: []

@@ -49,12 +49,14 @@ public class Gun : MonoBehaviour
     float nextTimeToFire;
     float currentSpread;
     float pendingPitch, pendingYaw;
+    GunScope scope;                    // optional: aiming (right mouse button) tightens the spread
 
     void Awake()
     {
         if (mainCamera == null) mainCamera = Camera.main;
         if (orbitalCamera == null) orbitalCamera = FindAnyObjectByType<CinemachineOrbitalFollow>();
         if (effects == null) effects = GetComponent<GunEffects>();
+        scope = GetComponent<GunScope>();
         if (audioSource == null)
         {
             audioSource = gameObject.AddComponent<AudioSource>();
@@ -114,9 +116,10 @@ public class Gun : MonoBehaviour
 
         // Random offset on the camera's right/up axes gives a cone of fire
         Transform cam = mainCamera.transform;
+        float spread = currentSpread * (scope != null ? scope.SpreadMultiplier : 1f); // aiming tightens the spread
         Vector3 dir = cam.forward
-                    + cam.right * Random.Range(-currentSpread, currentSpread)
-                    + cam.up * Random.Range(-currentSpread, currentSpread);
+                    + cam.right * Random.Range(-spread, spread)
+                    + cam.up * Random.Range(-spread, spread);
         dir.Normalize();
 
         Vector3 endPoint = cam.position + dir * range;
