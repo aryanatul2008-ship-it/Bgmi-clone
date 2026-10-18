@@ -12,6 +12,12 @@ public class Gun : MonoBehaviour
     public float fireRate = 10f;       // bullets per second
     public bool automatic = true;
 
+    [Header("Melee (tick for the Knife)")]
+    public bool melee = false;         // true = no ammo, short-range stab (Fire Rate = stabs per second)
+    public float meleeRange = 2.5f;
+    public float meleeRadius = 0.45f;
+    public bool logStabs = true;       // prints what each stab hit in the Console (untick when you're done testing)
+
     [Header("Ammo")]
     public int maxAmmo = 30;           // magazine size
     public int reserveAmmo = 90;
@@ -57,6 +63,7 @@ public class Gun : MonoBehaviour
         if (orbitalCamera == null) orbitalCamera = FindAnyObjectByType<CinemachineOrbitalFollow>();
         if (effects == null) effects = GetComponent<GunEffects>();
         scope = GetComponent<GunScope>();
+        if (effects == null && melee) effects = gameObject.AddComponent<GunEffects>(); // gives the knife its red hit puff
         if (audioSource == null)
         {
             audioSource = gameObject.AddComponent<AudioSource>();
@@ -69,7 +76,7 @@ public class Gun : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        currentAmmo = maxAmmo;
+        if (!started) currentAmmo = maxAmmo; // a weapon picked up with saved ammo (SetAmmo) keeps it
         currentSpread = baseSpread;
         started = true;
     }
@@ -83,6 +90,12 @@ public class Gun : MonoBehaviour
         currentSpread = Mathf.MoveTowards(currentSpread, baseSpread, spreadRecovery * Time.deltaTime);
 
         if (Cursor.lockState != CursorLockMode.Locked || isReloading) return;
+
+        if (melee)
+        {
+            if (Input.GetButtonDown("Fire1") && Time.time >= nextTimeToFire) Stab();
+            return;
+        }
 
         if (Input.GetKeyDown(KeyCode.R)) { StartReload(); return; }
 
@@ -102,7 +115,7 @@ public class Gun : MonoBehaviour
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
-        else if (Cursor.lockState != CursorLockMode.Locked && Input.GetMouseButtonDown(0))
+        else if (!PlayerInventory.IsOpen && Cursor.lockState != CursorLockMode.Locked && Input.GetMouseButtonDown(0))
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
@@ -196,6 +209,61 @@ public class Gun : MonoBehaviour
         currentAmmo += needed;
         reserveAmmo -= needed;
         isReloading = false;
+    }
+
+    void Stab()
+    {
+        nextTimeToFire = Time.time + 1f / fireRate;
+
+        Transform body = transform.root;                       // the Player
+        Vector3 forward = body.forward;                        // the player always faces where the camera looks
+        Vector3 centre = body.position + forward * (meleeRange * 0.5f);
+        float radius = meleeRange * 0.5f + meleeRadius;
+
+        // Find the nearest living non-player in front of you inside the reach
+        Collider[] found = Physics.OverlapSphere(centre, radius, hitMask, QueryTriggerInteraction.Ignore);
+        Health best = null;
+        float bestDist = float.MaxValue;
+        Vector3 bestPoint = Vector3.zero;
+
+        foreach (Collider c in found)
+        {
+            Health h = c.GetComponentInParent<Health>();
+            if (h == null || h.isPlayer || h.IsDead) continue;
+
+            Vector3 point = c.ClosestPoint(body.position);
+            Vector3 flat = point - body.position;
+            flat.y = 0f;
+            float d = flat.magnitude;
+            if (d > meleeRange) continue;
+            if (d > 0.05f && Vector3.Dot(flat.normalized, forward) < 0.3f) continue; // must be roughly in front of you
+
+            if (d < bestDist) { best = h; bestDist = d; bestPoint = point; }
+        }
+
+        if (best != null)
+        {
+            best.TakeDamage(damage, true);
+            if (effects != null) effects.HitPuff(bestPoint, (body.position - bestPoint).normalized, true);
+        }
+
+        if (logStabs)
+            Debug.Log(best != null ? "Knife hit " + best.name + " for " + damage
+                                   : "Knife stab: nothing within " + meleeRange + " m in front of you");
+
+        if (audioSource && shotClip)
+        {
+            audioSource.pitch = Random.Range(0.95f, 1.05f);
+            audioSource.PlayOneShot(shotClip, shotVolume);
+        }
+    }
+
+    // Used when a dropped weapon is picked up again, so it keeps the ammo it had.
+    public void SetAmmo(int mag, int reserve)
+    {
+        currentAmmo = Mathf.Clamp(mag, 0, maxAmmo);
+        reserveAmmo = Mathf.Max(0, reserve);
+        started = true;
     }
 
     public void AddAmmo(int amount) { reserveAmmo += amount; }

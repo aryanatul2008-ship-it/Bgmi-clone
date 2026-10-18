@@ -1,14 +1,16 @@
 using UnityEngine;
 
-/// Walk into it to use it. Put on an object with a Collider (it is switched to Trigger automatically).
-/// Heal  = restores "amount" health (only used if you're hurt).
-/// Ammo  = adds "amount" reserve ammo to the weapon you are holding.
+/// Walk into it to collect it. Put on an object with a Collider (it is switched to Trigger automatically).
+/// Heal   = a MEDKIT goes into your backpack (use it with H or from the backpack screen)
+/// Bandage = a BANDAGE goes into your backpack
+/// Ammo   = adds "amount" reserve ammo to the weapon you are holding
 public class ItemPickup : MonoBehaviour
 {
-    public enum ItemType { Heal, Ammo }
+    // Keep this order: Heal = 0 and Ammo = 1 are what your existing pickups in the scene use.
+    public enum ItemType { Heal, Ammo, Bandage }
 
     public ItemType type = ItemType.Heal;
-    public float amount = 25f;
+    public float amount = 30f;     // only used for Ammo
 
     void Reset() { MakeTrigger(); }
     void Awake() { MakeTrigger(); }
@@ -16,39 +18,38 @@ public class ItemPickup : MonoBehaviour
     void MakeTrigger()
     {
         Collider c = GetComponent<Collider>();
-        if (c != null && !c.isTrigger) c.isTrigger = true; // a solid collider would block you and never fire
+        if (c != null && !c.isTrigger) c.isTrigger = true;
     }
 
     void Update() { transform.Rotate(0, 90f * Time.deltaTime, 0); } // spin so it's easy to spot
 
     void OnTriggerEnter(Collider other) { TryUse(other, true); }
-    void OnTriggerStay(Collider other) { TryUse(other, false); } // lets you pick it up later if you were at full health
+    void OnTriggerStay(Collider other) { TryUse(other, false); } // lets you collect it later, once your backpack has room
 
-    void TryUse(Collider other, bool logReason)
+    void TryUse(Collider other, bool announce)
     {
-        if (type == ItemType.Heal)
-        {
-            Health h = other.GetComponentInParent<Health>();
-            if (h == null || !h.isPlayer) return;
-            if (h.Current >= h.maxHealth)
-            {
-                if (logReason) Debug.Log("ItemPickup: health is already full, heal not used.");
-                return;
-            }
-            h.Heal(amount);
-            Destroy(gameObject);
-        }
-        else
+        if (type == ItemType.Ammo)
         {
             WeaponSwitcher sw = other.GetComponentInParent<WeaponSwitcher>();
             if (sw == null) return;
-            if (sw.CurrentGun == null)
+            Gun g = sw.CurrentGun;
+            if (g == null || g.melee)
             {
-                if (logReason) Debug.Log("ItemPickup: no weapon equipped, ammo not used.");
+                if (announce) PlayerInventory.Notify("Equip a gun to take ammo");
                 return;
             }
-            sw.CurrentGun.AddAmmo(Mathf.RoundToInt(amount));
+            int n = Mathf.RoundToInt(amount);
+            g.AddAmmo(n);
+            PlayerInventory.Notify("+" + n + " ammo for " + g.name);
             Destroy(gameObject);
+            return;
         }
+
+        PlayerInventory inv = other.GetComponentInParent<PlayerInventory>();
+        if (inv == null) return;
+
+        bool added = type == ItemType.Heal ? inv.AddMedkit(1) : inv.AddBandage(1);
+        if (added) Destroy(gameObject);
+        else if (announce) PlayerInventory.Notify("Backpack full");
     }
 }

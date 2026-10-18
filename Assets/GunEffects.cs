@@ -125,6 +125,16 @@ public class GunEffects : MonoBehaviour
         }
     }
 
+    /// Only the hit puff (used by the knife: no tracer and no muzzle flash)
+    public void HitPuff(Vector3 point, Vector3 normal, bool hitCharacter)
+    {
+        Puff p = puffs[puffIndex];
+        puffIndex = (puffIndex + 1) % PuffCount;
+        Show(p, point + normal * 0.05f,
+             hitCharacter ? enemyHitColor : surfaceHitColor,
+             hitCharacter ? enemyHitSize : surfaceHitSize, hitTime);
+    }
+
     // ------------------------------------------------------------ internals
 
     Vector3 MuzzlePosition()

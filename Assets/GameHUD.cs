@@ -203,6 +203,6 @@ public class GameHUD : MonoBehaviour
         Color tc = active ? Color.black : (owned ? Color.white : new Color(1, 1, 1, 0.35f));
         s.key.color = tc; s.name.color = tc; s.ammo.color = tc;
         s.name.text = owned ? gun.name : "EMPTY";
-        s.ammo.text = !owned ? "" : (reloading ? "RELOADING" : ammo + " / " + reserve);
+        s.ammo.text = !owned || gun.melee ? "" : (reloading ? "RELOADING" : ammo + " / " + reserve);
     }
 }

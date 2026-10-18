@@ -153,6 +153,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponPickup
   weaponIndex: 0
   bonusAmmo: 30
+  magAmmo: -1
+  reserveAmmo: -1
 --- !u!65 &16905796
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -240,7 +242,7 @@ Transform:
   m_GameObject: {fileID: 16905794}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -50, y: 0.5, z: -67}
+  m_LocalPosition: {x: -71, y: 0.5, z: -71}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -404,6 +406,7 @@ GameObject:
   - component: {fileID: 27423722}
   - component: {fileID: 27423723}
   - component: {fileID: 27423724}
+  - component: {fileID: 27423725}
   m_Layer: 2
   m_Name: Player
   m_TagString: Player
@@ -449,6 +452,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1020248815}
   - {fileID: 618132626}
   - {fileID: 1412872501}
   - {fileID: 1593317775}
@@ -527,7 +531,8 @@ MonoBehaviour:
   - {fileID: 618132627}
   - {fileID: 1593317774}
   - {fileID: 1412872502}
-  owned: 010101y
+  - {fileID: 1020248816}
+  owned: 01y
 --- !u!114 &27423722
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -580,6 +585,30 @@ MonoBehaviour:
   playerHealth: {fileID: 0}
   vcam: {fileID: 0}
   crosshair: {fileID: 0}
+--- !u!114 &27423725
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 27423713}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2567b3b00192c8f44ac2d248603aa0e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerInventory
+  bandages: 0
+  medkits: 0
+  maxBandages: 5
+  maxMedkits: 2
+  bandageHeal: 20
+  medkitHeal: 50
+  inventoryKey: 9
+  healKey: 104
+  dropWeaponKey: 103
+  switcher: {fileID: 0}
+  health: {fileID: 0}
+  vcam: {fileID: 0}
 --- !u!4 &29311227 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2143742791705135478, guid: 3163e5ae0c5163347be81942295b1940, type: 3}
@@ -2360,8 +2389,11 @@ MonoBehaviour:
   range: 100
   fireRate: 10
   automatic: 1
+  melee: 0
+  meleeRange: 2.5
+  meleeRadius: 0.45
   maxAmmo: 30
-  reserveAmmo: 90
+  reserveAmmo: 0
   reloadTime: 1.4
   mainCamera: {fileID: 961739752}
   orbitalCamera: {fileID: 0}
@@ -3306,6 +3338,78 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2143742791705135478, guid: 3163e5ae0c5163347be81942295b1940, type: 3}
   m_PrefabInstance: {fileID: 983933800}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1020248814
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1020248815}
+  - component: {fileID: 1020248816}
+  m_Layer: 0
+  m_Name: Knife
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1020248815
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1020248814}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 65.34216, y: -0.99999, z: 118.742035}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 27423715}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1020248816
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1020248814}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9b3a0d642db25a44b7b88d0b9254444, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Gun
+  damage: 35
+  range: 100
+  fireRate: 1.7
+  automatic: 0
+  melee: 1
+  meleeRange: 2.5
+  meleeRadius: 0.45
+  maxAmmo: 1
+  reserveAmmo: 0
+  reloadTime: 2
+  mainCamera: {fileID: 0}
+  orbitalCamera: {fileID: 0}
+  effects: {fileID: 0}
+  muzzleFlash: {fileID: 0}
+  audioSource: {fileID: 0}
+  shotClip: {fileID: 0}
+  reloadClip: {fileID: 0}
+  shotVolume: 0.8
+  hitMask:
+    serializedVersion: 2
+    m_Bits: 51
+  baseSpread: 0.005
+  spreadPerShot: 0.004
+  maxSpread: 0.05
+  spreadRecovery: 0.1
+  recoilPitch: 1
+  recoilYaw: 0.4
+  recoilSmoothing: 20
 --- !u!1 &1029304550
 GameObject:
   m_ObjectHideFlags: 0
@@ -3527,7 +3631,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponPickup
   weaponIndex: 2
-  bonusAmmo: 10
+  bonusAmmo: 20
+  magAmmo: -1
+  reserveAmmo: -1
 --- !u!65 &1100162965
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3913,6 +4019,133 @@ MonoBehaviour:
         DecelTime: 0
   PlayerIndex: -1
   AutoEnableInputs: 1
+--- !u!1 &1119551326
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1119551331}
+  - component: {fileID: 1119551330}
+  - component: {fileID: 1119551329}
+  - component: {fileID: 1119551328}
+  - component: {fileID: 1119551327}
+  m_Layer: 0
+  m_Name: Pickup_Bandage
+  m_TagString: Untagged
+  m_Icon: {fileID: 2974397684917235467, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1119551327
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1119551326}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35bd63593af0e6b47b28afc36e641f07, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemPickup
+  type: 2
+  amount: 20
+--- !u!65 &1119551328
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1119551326}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!23 &1119551329
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1119551326}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &1119551330
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1119551326}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!4 &1119551331
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1119551326}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -72, y: 0.5, z: -71}
+  m_LocalScale: {x: 0.4, y: 0.4, z: 0.4}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1127078991
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4318,6 +4551,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponPickup
   weaponIndex: 1
   bonusAmmo: 40
+  magAmmo: -1
+  reserveAmmo: -1
 --- !u!4 &1282984198 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2143742791705135478, guid: 3163e5ae0c5163347be81942295b1940, type: 3}
@@ -4563,8 +4798,11 @@ MonoBehaviour:
   range: 100
   fireRate: 1.2
   automatic: 0
+  melee: 0
+  meleeRange: 2.5
+  meleeRadius: 0.45
   maxAmmo: 5
-  reserveAmmo: 20
+  reserveAmmo: 0
   reloadTime: 2.5
   mainCamera: {fileID: 961739752}
   orbitalCamera: {fileID: 0}
@@ -5232,8 +5470,11 @@ MonoBehaviour:
   range: 100
   fireRate: 15
   automatic: 1
+  melee: 0
+  meleeRange: 2.5
+  meleeRadius: 0.45
   maxAmmo: 40
-  reserveAmmo: 120
+  reserveAmmo: 0
   reloadTime: 1.3
   mainCamera: {fileID: 961739752}
   orbitalCamera: {fileID: 0}
@@ -5772,7 +6013,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ItemPickup
   type: 0
-  amount: 25
+  amount: 50
 --- !u!65 &1896407787
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -6674,10 +6915,11 @@ SceneRoots:
   - {fileID: 606853999}
   - {fileID: 1851616741}
   - {fileID: 1991117094}
-  - {fileID: 1274532498}
   - {fileID: 16905799}
+  - {fileID: 1274532498}
   - {fileID: 1100162968}
   - {fileID: 1896407790}
+  - {fileID: 1119551331}
   - {fileID: 416735005}
   - {fileID: 503921335}
   - {fileID: 2051852674}
