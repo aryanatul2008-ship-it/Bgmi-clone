@@ -1,8 +1,8 @@
 using UnityEngine;
 
 /// Put on the Player (the object that has CharacterController + PlayerMovement).
-/// Feeds the character model's Animator: local movement direction (for walk / run / strafe),
-/// whether you are on the ground (jump / fall) and whether you are dead.
+/// Feeds the character model's Animator: local movement direction (walk / run / strafe),
+/// overall speed and crouching (for the crouch blend), whether you are on the ground (jump / fall) and whether you are dead.
 public class PlayerAnimator : MonoBehaviour
 {
     public Animator animator;        // on the character model (a child of the Player). Found automatically.
@@ -17,7 +17,9 @@ public class PlayerAnimator : MonoBehaviour
 
     static readonly int MoveX = Animator.StringToHash("MoveX");
     static readonly int MoveZ = Animator.StringToHash("MoveZ");
+    static readonly int MoveSpeed = Animator.StringToHash("MoveSpeed");
     static readonly int Grounded = Animator.StringToHash("Grounded");
+    static readonly int Crouching = Animator.StringToHash("Crouching");
     static readonly int DeadParam = Animator.StringToHash("Dead");
 
     void Awake()
@@ -44,8 +46,13 @@ public class PlayerAnimator : MonoBehaviour
 
         // 1.0 = full sprint speed, so a normal walk lands around 0.6 and blends between the walk and run clips
         float top = movement != null ? movement.moveSpeed * movement.sprintMultiplier : 8f;
-        animator.SetFloat(MoveX, local.x / top, damping, Time.deltaTime);
-        animator.SetFloat(MoveZ, local.z / top, damping, Time.deltaTime);
+        float x = local.x / top;
+        float z = local.z / top;
+        animator.SetFloat(MoveX, x, damping, Time.deltaTime);
+        animator.SetFloat(MoveZ, z, damping, Time.deltaTime);
+        animator.SetFloat(MoveSpeed, new Vector2(x, z).magnitude, damping, Time.deltaTime);
+
+        animator.SetBool(Crouching, movement != null && movement.IsCrouching);
 
         if (cc.isGrounded) airTime = 0f; else airTime += Time.deltaTime;
         animator.SetBool(Grounded, airTime < airGrace);

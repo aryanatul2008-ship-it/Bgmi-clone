@@ -33,6 +33,7 @@ public class EnemyAI : MonoBehaviour
     NavMeshAgent agent;
     Transform target;
     Health targetHealth;
+    Collider targetCollider;     // the player's collider: its centre moves down when the player crouches
     AudioSource audioSource;
     float nextShot;
     float nextThink;
@@ -56,6 +57,8 @@ public class EnemyAI : MonoBehaviour
         {
             target = p.transform;
             targetHealth = p.GetComponentInParent<Health>();
+            targetCollider = p.GetComponent<CharacterController>();
+            if (targetCollider == null) targetCollider = p.GetComponentInChildren<Collider>();
         }
         else
         {
@@ -109,7 +112,7 @@ public class EnemyAI : MonoBehaviour
     bool CanSeeTarget(float d)
     {
         Vector3 eye = transform.position + Vector3.up * eyeHeight;
-        Vector3 toTarget = (target.position + aimOffset) - eye;
+        Vector3 toTarget = AimPoint() - eye;
 
         // The field-of-view check only applies outside hearRange
         if (d > hearRange && Vector3.Angle(transform.forward, toTarget) > fieldOfView * 0.5f) return false;
@@ -117,6 +120,18 @@ public class EnemyAI : MonoBehaviour
         if (Physics.Raycast(eye, toTarget.normalized, out RaycastHit hit, sightRange, sightMask, QueryTriggerInteraction.Ignore))
             return hit.transform.root == target.root;
         return false;
+    }
+
+    // Where the bot aims: the middle of the player's REAL collider (a little above its centre), so it still
+    // points at the body when the player crouches. A fixed height would sail over a crouched player's head.
+    Vector3 AimPoint()
+    {
+        if (targetCollider != null)
+        {
+            Bounds b = targetCollider.bounds;
+            return b.center + Vector3.up * (b.extents.y * 0.25f);
+        }
+        return target.position + aimOffset;
     }
 
     void FaceTarget()
@@ -138,7 +153,7 @@ public class EnemyAI : MonoBehaviour
         }
 
         Vector3 eye = transform.position + Vector3.up * eyeHeight;
-        Vector3 aim = (target.position + aimOffset) - eye;
+        Vector3 aim = AimPoint() - eye;
         aim += Random.insideUnitSphere * inaccuracy * d; // worse accuracy at distance
         if (Physics.Raycast(eye, aim.normalized, out RaycastHit hit, sightRange, sightMask, QueryTriggerInteraction.Ignore))
         {
