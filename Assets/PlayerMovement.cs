@@ -108,4 +108,5 @@ public class PlayerMovement : MonoBehaviour
         Vector3 top = transform.position + Vector3.up * (standHeight * 0.5f - controller.radius);
         return !Physics.CheckSphere(top, controller.radius * 0.95f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
     }
+    public void ResetFall() { peakY = transform.position.y; wasGrounded = true; velocity = Vector3.zero; }
 }
