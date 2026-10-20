@@ -59,81 +59,89 @@
 
 The diagram below illustrates how our gameplay scripts, procedural world generators, AI agents, and code-built UI canvases interact at runtime inside `Assets/Scenes/bgmiclone_plane.unity`:
 
-<pre><code class="language-mermaid">flowchart TD
+~~~~mermaid
+flowchart LR
+    classDef orangeNode fill:#d97706,stroke:#fbbf24,stroke-width:2px,color:#ffffff,font-weight:bold;
+    classDef yellowNode fill:#eab308,stroke:#fef08a,stroke-width:2px,color:#111827,font-weight:bold;
+    classDef cyanNode fill:#0284c7,stroke:#7dd3fc,stroke-width:2px,color:#ffffff,font-weight:bold;
+    classDef greenNode fill:#16a34a,stroke:#86efac,stroke-width:2px,color:#ffffff,font-weight:bold;
+    classDef darkNode fill:#1e293b,stroke:#94a3b8,stroke-width:2px,color:#f8fafc,font-weight:bold;
+
     subgraph LobbyAndDrop["1. Match Flow & Air Drop Sequence"]
-        MML["MainMenuLobby.cs<br/>(3D Sky Stage & Sorting Order 20 UI)"]
-        MSS["MatchStartSequence.cs<br/>(Matchmaking -> C-130 Plane -> Freefall -> Parachute -> Land)"]
-        MML -->|"START clicked: unlocks match,<br/>restores HUD, triggers sequence"| MSS
+        direction TB
+        MML["MainMenuLobby.cs<br/>(3D Sky Stage & Order 20 UI)"]:::orangeNode
+        MSS["MatchStartSequence.cs<br/>(C-130 Plane -> Freefall -> Parachute -> Land)"]:::orangeNode
+        MML ==>|"START clicked: unlocks match,<br/>restores HUD, triggers sequence"| MSS
     end
 
-    subgraph PlayerRoot["2. Player Root Object ('Player')"]
-        PM["PlayerMovement.cs<br/>(Walk, Sprint, Crouch, Jump, Fall Damage)"]
-        CC["CharacterController<br/>(Capsule Physics & Grounding)"]
-        PA["PlayerAnimator.cs<br/>(2D Velocity Blend Tree Driver)"]
-        ANIM["Animator<br/>(PlayerAnimator Controller + Medea Rig)"]
-        SPS["StarterPistolSetup.cs<br/>(9mm Starter Pistol + Shared SMG Ammo)"]
-        WS["WeaponSwitcher.cs<br/>(Slots 1-4, Q/E, Scroll, Pickup/Remove)"]
-        GUN["Gun.cs<br/>(Raycast Fire, Reload, Spread, Recoil)"]
-        GE["GunEffects.cs<br/>(Muzzle Flash, Bullet Tracers, Hit Puffs)"]
-        GS["GunScope.cs<br/>(RedDot / Sniper FOV & Spread Multipliers)"]
-        WM["WeaponModel.cs<br/>(RightHand Bone Binding & Camera Alignment)"]
-        SC["ScopeController.cs<br/>(Right-Click Zoom, Sensitivity Scaling, Scope Overlays)"]
-        PINV["PlayerInventory.cs<br/>(Tab Backpack UI, Medkits/Bandages, G Drop)"]
-        FS["FootstepSounds.cs<br/>(Grass Footstep Clips)"]
-        PH["Health.cs<br/>(Player HP & Static PlayerKills Counter)"]
-        PD["PlayerDeath.cs<br/>(Death State & Component Disable)"]
+    subgraph PlayerRoot["2. Player Systems ('Player' Root)"]
+        direction TB
+        PM["PlayerMovement.cs<br/>(Move, Crouch, Jump, Fall Damage)"]:::yellowNode
+        CC["CharacterController<br/>(Capsule Physics)"]:::darkNode
+        PA["PlayerAnimator.cs<br/>(2D Velocity Blend Tree)"]:::yellowNode
+        ANIM["Animator<br/>(Medea Humanoid Rig)"]:::darkNode
+        SPS["StarterPistolSetup.cs<br/>(9mm Pistol + Shared SMG Ammo)"]:::yellowNode
+        WS["WeaponSwitcher.cs<br/>(Slots 1-4, Q/E, Scroll)"]:::yellowNode
+        GUN["Gun.cs<br/>(Raycast Fire, Reload, Spread, Recoil)"]:::yellowNode
+        GE["GunEffects.cs & GunScope.cs & WeaponModel.cs<br/>(Tracers, RedDot/Sniper Scope, RightHand Bind)"]:::darkNode
+        SC["ScopeController.cs<br/>(Right-Click FOV Zoom & Sensitivity)"]:::yellowNode
+        PINV["PlayerInventory.cs<br/>(Tab Backpack, H Heal, G Drop)"]:::yellowNode
+        FS["FootstepSounds.cs<br/>(3 Grass Footstep Clips)"]:::darkNode
+        PH["Health.cs & PlayerDeath.cs<br/>(Player HP & PlayerKills Counter)"]:::yellowNode
     end
 
-    subgraph CameraRig["3. Camera System"]
-        VCAM["CinemachineCamera<br/>(Orbital Follow + Rotation Composer)"]
+    subgraph CameraAndUI["3. Camera & Code-Built HUD"]
+        direction TB
+        VCAM["CinemachineCamera<br/>(Orbital Follow + Rotation Composer)"]:::cyanNode
+        GHUD["GameHUD.cs<br/>(HP Bar, Weapon Slots, Kills)"]:::cyanNode
+        MMAP["MiniMap.cs<br/>(Top-Down Ortho Camera)"]:::cyanNode
+        ROD["RestartOnDeath.cs<br/>(YOU DIED -> Enter Reloads)"]:::cyanNode
     end
 
-    subgraph WorldAndAI["4. World Generation, Loot & AI Bots"]
-        LS["LootSpawner.cs<br/>(~100 Map Pickups + 3D Procedural Models)"]
-        IP["ItemPickup.cs<br/>(Heal, Bandage, Ammo Triggers)"]
-        WP["WeaponPickup.cs<br/>(Rifle, SMG, Sniper Triggers)"]
-        MPS["MapPropSpawner.cs<br/>(Enterable Shacks, Trees, Rocks, NavMeshObstacle)"]
-        ES["EnemySpawner.cs<br/>(Spawns Bot Prefabs on NavMesh)"]
-        EAI["EnemyAI.cs<br/>(Patrol, Sight/Hearing LOS, Chase, Raycast Shoot)"]
-        EAN["EnemyAnimator.cs<br/>(Bot Blend Tree & Death Trigger)"]
-        EH["Health.cs<br/>(Bot HP)"]
+    subgraph WorldAndAI["4. Procedural World, Loot & AI Bots"]
+        direction TB
+        LS["LootSpawner.cs<br/>(~100 Pickups + 3D Models)"]:::greenNode
+        MPS["MapPropSpawner.cs<br/>(Enterable Shacks, Trees, Rocks, NavMeshObstacle)"]:::greenNode
+        PICK["ItemPickup.cs & WeaponPickup.cs<br/>(Medkit, Bandage, Ammo, Guns)"]:::darkNode
+        ES["EnemySpawner.cs<br/>(Spawns Bots on NavMesh)"]:::greenNode
+        EAI["EnemyAI.cs & EnemyAnimator.cs<br/>(Patrol, Sight/Hearing LOS, Chase, Shoot)"]:::greenNode
+        EH["Health.cs<br/>(Bot HP)"]:::darkNode
     end
 
-    subgraph UISystem["5. Code-Built HUD & Match Loop"]
-        GHUD["GameHUD.cs<br/>(Health Bar, Weapon Slots, Kill Counter)"]
-        MMAP["MiniMap.cs<br/>(Top-Down Orthographic Camera + RenderTexture)"]
-        ROD["RestartOnDeath.cs<br/>(YOU DIED Prompt -> Enter Reloads Scene)"]
-    end
-
-    MSS -->|"On F Jump: enables"| ES
-    MSS -->|"On Ground Landing:<br/>calls ResetFall() & enables"| PM
-    MSS -->|"On Ground Landing: enables"| CC & WS & PINV & SC & GUN
+    %% Cross-System Data Flow
+    MSS ==>|"On F Jump: enables"| ES
+    MSS ==>|"On Landing: ResetFall() & enables"| PM
+    MSS ==>|"On Landing: enables"| CC & WS & PINV & SC & GUN
 
     PM --> CC
     PA --> ANIM
     SPS --> WS & GUN
     WS --> GUN
-    GUN --> GE & GS & WM
-    GUN -->|"Applies pitch/yaw recoil"| VCAM
-    SC -->|"Reads active GunScope"| GS
-    SC -->|"Zooms FOV & scales screen composer"| VCAM
+    GUN --> GE
+    GUN -.->|"Pitch/Yaw Recoil"| VCAM
+    SC -.->|"FOV Zoom & Aim Compensation"| VCAM
 
-    LS --> IP & WP
-    MPS -->|"Spawns interior shack loot"| IP & WP
-    IP -->|"Adds Medkit/Bandage/Ammo"| PINV & GUN
-    WP -->|"Equips weapon or adds ammo"| WS
+    LS --> PICK
+    MPS -->|"Spawns interior shack loot"| PICK
+    PICK ==>|"Collects items / weapons"| PINV & WS & GUN
 
     ES --> EAI
-    EAI --> EAN & EH
-    GUN -->|"Raycast hit -> TakeDamage(dmg, true)"| EH
-    EH -->|"Increments Health.PlayerKills"| GHUD
-    EAI -->|"Distance-spread raycast"| PH
-    PH --> PD & GHUD & ROD
-</code></pre>
+    EAI --> EH
+    GUN ==>|"Raycast Hit -> TakeDamage()"| EH
+    EH -.->|"Increments Health.PlayerKills"| GHUD
+    EAI ==>|"Distance-Spread Raycast"| PH
+    PH --> GHUD & ROD
+
+    style LobbyAndDrop fill:#451a03,stroke:#f59e0b,stroke-width:2px,color:#fef3c7
+    style PlayerRoot fill:#422006,stroke:#eab308,stroke-width:2px,color:#fef9c3
+    style CameraAndUI fill:#082f49,stroke:#38bdf8,stroke-width:2px,color:#e0f2fe
+    style WorldAndAI fill:#052e16,stroke:#4ade80,stroke-width:2px,color:#dcfce7
+~~~~
 
 ### Project Structure
 
-<pre><code>Assets/
+~~~~text
+Assets/
 ├── Audio/                           # Gunshot, reload, and grass footstep audio clips (Pixabay)
 ├── Character/                       # Mixamo humanoid FBX skins (Medea, Ely, X Bot), materials & Animator controllers
 │   └── Animations/                  # Mixamo humanoid animation clips (idle, walk, run, crouch, jump, death)
@@ -169,7 +177,7 @@ The diagram below illustrates how our gameplay scripts, procedural world generat
 ├── WeaponModel.cs                   # Attaches 3D gun meshes to the humanoid RightHand bone aligned to camera aim
 ├── WeaponPickup.cs                  # Trigger pickup logic for ground and dropped weapons (preserves mag/reserve ammo)
 └── WeaponSwitcher.cs                # Manages owned weapons, 1-4/Q/E/scroll switching, and fallback selection
-</code></pre>
+~~~~
 
 ---
 
@@ -316,9 +324,10 @@ In accordance with the recruitment guidelines, we want to be completely transpar
 - **Git** (or GitHub Desktop)
 
 ### 2. Clone the Repository
-<pre><code class="language-bash">git clone https://github.com/aryanatul2008-ship-it/Bgmi-clone.git
+~~~~bash
+git clone https://github.com/aryanatul2008-ship-it/Bgmi-clone.git
 cd Bgmi-clone
-</code></pre>
+~~~~
 *(Note: If the repository is private for evaluation, ensure your GitHub account has been granted collaborator access).*
 
 ### 3. Open the Project in Unity Hub
