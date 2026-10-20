@@ -193,12 +193,12 @@ Assets/
 
 | 3D Interactive Main Menu Lobby | Enterable Shacks & Open-Field Combat |
 | :---: | :---: |
-| ![3D Main Menu Lobby](assets/lobby.jpg) | ![Enterable Shacks and Combat](assets/shacks-and-combat.jpg) |
+| ![3D Main Menu Lobby](assets/lobby.png) | ![Enterable Shacks and Combat](assets/shacks-and-combat.png) |
 | *3D character turntable, profile card, and mode selector (`MainMenuLobby.cs`)* | *Walk-in wooden shacks, cover boulders, and active HUD (`MapPropSpawner.cs`)* |
 
 | Urban Buildings & 3D Ground Loot | Death Screen & Match Restart Loop |
 | :---: | :---: |
-| ![City Buildings and Ground Loot](assets/city-and-loot.jpg) | ![Player Death and Restart Prompt](assets/death-screen.jpg) |
+| ![City Buildings and Ground Loot](assets/city-and-loot.png) | ![Player Death and Restart Prompt](assets/death-screen.png) |
 | *Kenney city apartments, nature trees, and 3D loot pickups (`LootSpawner.cs`)* | *Humanoid death animation and `Press ENTER to play again` (`RestartOnDeath.cs`)* |
 
 ---
