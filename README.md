@@ -1,6 +1,6 @@
 <div align="center">
 
-# DropZone 300
+# BGMI NITK Edition
 
 ---
 
