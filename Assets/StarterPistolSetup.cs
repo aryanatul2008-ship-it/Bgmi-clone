@@ -301,27 +301,15 @@ public class StarterPistolSetup : MonoBehaviour
 
     Material CreateSafeMaterial(Color color)
     {
-        if (cachedTemplateMaterial == null)
+        // Unity ka default built-in URP material use karo jo build mein kabhi pink nahi hota
+        Material mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+        if (mat.shader == null || !mat.shader.isSupported)
         {
-            GameObject temp = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            Renderer r = temp.GetComponent<Renderer>();
-            if (r != null && r.sharedMaterial != null)
-            {
-                cachedTemplateMaterial = r.sharedMaterial;
-            }
-            Destroy(temp);
+            mat = new Material(Shader.Find("Universal Render Pipeline/Simple Lit"));
         }
-
-        Material mat;
-        if (cachedTemplateMaterial != null)
+        if (mat.shader == null || !mat.shader.isSupported)
         {
-            mat = new Material(cachedTemplateMaterial);
-        }
-        else
-        {
-            Shader shader = Shader.Find("Universal Render Pipeline/Lit");
-            if (shader == null) shader = Shader.Find("Sprites/Default");
-            mat = new Material(shader);
+            mat = new Material(Shader.Find("Standard"));
         }
 
         mat.color = color;

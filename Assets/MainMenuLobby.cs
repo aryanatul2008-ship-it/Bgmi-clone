@@ -799,12 +799,18 @@ public class MainMenuLobby : MonoBehaviour
 
     Material CreateSafeMaterial(Color color)
     {
-        Shader shader = Shader.Find("Universal Render Pipeline/Lit");
-        if (shader == null) shader = Shader.Find("Universal Render Pipeline/Simple Lit");
-        if (shader == null) shader = Shader.Find("Standard");
-        if (shader == null) shader = Shader.Find("Sprites/Default");
+        // Unity ka default built-in URP material use karo jo build mein kabhi pink nahi hota
+        Material mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+        if (mat.shader == null || !mat.shader.isSupported)
+        {
+            mat = new Material(Shader.Find("Universal Render Pipeline/Simple Lit"));
+        }
+        if (mat.shader == null || !mat.shader.isSupported)
+        {
+            mat = new Material(Shader.Find("Standard"));
+        }
 
-        Material mat = new Material(shader);
+        mat.color = color;
         if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", color);
         if (mat.HasProperty("_Color")) mat.SetColor("_Color", color);
 
