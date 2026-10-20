@@ -184,7 +184,11 @@ Assets/
 ## Demo Video & Playable Build
 
 <!-- TODO: Replace (link coming soon) below with your final Demo Video link (YouTube / Google Drive) before submitting -->
-- **🎥 Demo Video:** (link coming soon)
+- **🎥 Demo Video:** 
+
+https://github.com/user-attachments/assets/58d1d421-ec06-4a46-9f20-9ce0baaf7500
+
+
 - **🎮 Playable Windows Build (itch.io):** [https://apexphoenix.itch.io/bgmi-clone-gdg](https://apexphoenix.itch.io/bgmi-clone-gdg)
 
 ---
