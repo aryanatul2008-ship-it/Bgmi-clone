@@ -7,7 +7,7 @@ using UnityEngine;
 /// - Uses downward raycasts so supplies rest accurately on the terrain.
 /// - Replaces plain cube meshes on both newly spawned pickups AND existing scene pickups with recognizable
 ///   multi-part 3D primitive models (Medkit with red cross, Bandage roll, Military Ammo Box, Weapon Cases).
-/// - Requires ZERO edits to ItemPickup.cs, WeaponPickup.cs, or PlayerInventory.cs.
+/// - Build-safe material cloning from Unity primitives (never turns pink or invisible in itch.io builds).
 /// </summary>
 public class LootSpawner : MonoBehaviour
 {
@@ -41,6 +41,7 @@ public class LootSpawner : MonoBehaviour
     private LayerMask groundMask;
     private Transform lootContainer;
     private List<Vector3> spawnedPositions = new List<Vector3>();
+    private Material cachedTemplateMaterial;
     private List<Material> createdMaterials = new List<Material>();
 
     // Cached weapon indices from Player's WeaponSwitcher (Rifle=0, SMG=1, Sniper=2 by default)
@@ -443,12 +444,30 @@ public class LootSpawner : MonoBehaviour
 
     Material CreateSafeMaterial(Color color)
     {
-        Shader shader = Shader.Find("Universal Render Pipeline/Lit");
-        if (shader == null) shader = Shader.Find("Universal Render Pipeline/Simple Lit");
-        if (shader == null) shader = Shader.Find("Standard");
-        if (shader == null) shader = Shader.Find("Sprites/Default");
+        if (cachedTemplateMaterial == null)
+        {
+            GameObject temp = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            Renderer r = temp.GetComponent<Renderer>();
+            if (r != null && r.sharedMaterial != null)
+            {
+                cachedTemplateMaterial = r.sharedMaterial;
+            }
+            Destroy(temp);
+        }
 
-        Material mat = new Material(shader);
+        Material mat;
+        if (cachedTemplateMaterial != null)
+        {
+            mat = new Material(cachedTemplateMaterial);
+        }
+        else
+        {
+            Shader shader = Shader.Find("Universal Render Pipeline/Lit");
+            if (shader == null) shader = Shader.Find("Sprites/Default");
+            mat = new Material(shader);
+        }
+
+        mat.color = color;
         if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", color);
         if (mat.HasProperty("_Color")) mat.SetColor("_Color", color);
 

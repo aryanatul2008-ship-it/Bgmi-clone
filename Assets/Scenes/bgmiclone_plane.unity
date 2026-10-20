@@ -721,6 +721,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainMenuLobby
   enableLobbyMenu: 1
+  gameTitleBanner: BATTLEGROUNDS MOBILE  |  NITK EDITION
   playerName: Commando@NITK
   playerLevel: 67
   rankTitle: Silver III
@@ -2071,6 +2072,7 @@ GameObject:
   - component: {fileID: 503921335}
   - component: {fileID: 503921334}
   - component: {fileID: 503921336}
+  - component: {fileID: 503921337}
   m_Layer: 0
   m_Name: HUD
   m_TagString: Untagged
@@ -2124,6 +2126,18 @@ MonoBehaviour:
   cameraHeight: 120
   textureSize: 256
   uiSize: 260
+--- !u!114 &503921337
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 503921333}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b37b254ad5e3687479db8e67971319c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RestartOnDeath
 --- !u!1001 &505677720
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3301,7 +3315,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 961739749}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.09331023, y: 0.19179855, z: -0.01832152, w: 0.9768167}
+  m_LocalRotation: {x: 0.09330336, y: 0.19216587, z: -0.018356612, w: 0.97674453}
   m_LocalPosition: {x: -70, y: 2.503529, z: -74.768585}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -4082,7 +4096,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1110795895}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.09331023, y: 0.19179852, z: -0.018321514, w: 0.9768167}
+  m_LocalRotation: {x: 0.093303345, y: 0.19216585, z: -0.018356605, w: 0.97674453}
   m_LocalPosition: {x: -70, y: 2.503529, z: -74.768585}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
