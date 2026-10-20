@@ -38,6 +38,9 @@ public class MatchStartSequence : MonoBehaviour
     public Transform playerTransform;
     public GameObject enemySpawnerObject;
 
+    [HideInInspector]
+    public bool waitingForLobby = false;
+
     private enum DropState
     {
         Inactive,
@@ -102,6 +105,29 @@ public class MatchStartSequence : MonoBehaviour
     {
         FindSceneReferences();
 
+        // If MainMenuLobby is enabled in the scene, wait for the START button click!
+        MainMenuLobby lobby = FindFirstObjectByType<MainMenuLobby>();
+        if (lobby != null && lobby.enableLobbyMenu)
+        {
+            waitingForLobby = true;
+            if (enemySpawnerObject != null) enemySpawnerObject.SetActive(false);
+            SetPlayerComponentsEnabled(false);
+            return;
+        }
+
+        LaunchSequenceNow();
+    }
+
+    public void TriggerSequenceFromLobby()
+    {
+        waitingForLobby = false;
+        LaunchSequenceNow();
+    }
+
+    void LaunchSequenceNow()
+    {
+        FindSceneReferences();
+
         if (!enableDropSequence)
         {
             // Normal ground start: ensure EnemySpawner is active so bots spawn as usual
@@ -109,6 +135,7 @@ public class MatchStartSequence : MonoBehaviour
             {
                 enemySpawnerObject.SetActive(true);
             }
+            SetPlayerComponentsEnabled(true);
             state = DropState.Inactive;
             enabled = false;
             return;

@@ -1143,13 +1143,13 @@ MonoBehaviour:
   attackRange: 25
   patrolRadius: 30
   thinkInterval: 0.15
-  fireRate: 2
-  damage: 6
-  inaccuracy: 0.06
+  fireRate: 1.5
+  damage: 4
+  inaccuracy: 0.2
   sightMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  shotClip: {fileID: 0}
+  shotClip: {fileID: 8300000, guid: 416116545b0645f4ba9db75930df7ea3, type: 3}
   shotVolume: 0.8
 --- !u!114 &-6346576899345483377
 MonoBehaviour:
